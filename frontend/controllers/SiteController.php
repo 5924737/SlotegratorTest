@@ -107,24 +107,18 @@ class SiteController extends Controller
                     'courseConvertation' => $courseConvertation
             ]);
             Yii::$container->set('random', $dependency[array_rand($dependency)]);
-
             if($action == 'refresh'){
                 $this->start();
-                return $this->redirect('/site/play');
             }elseif($action == 'refuse') {
                 $items = Yii::$container->get(ItemSource::class);
                 if($items -> refundLast())
                     Yii::$app->session->setFlash('success', "Вы отказались от приза.");
-                return $this->redirect('/site/play');
-
             }elseif($action == 'convert' || $int) {
                 $items = Yii::$container->get(MoneySource::class);
                 if($items->convertToBonus($int))
                     Yii::$app->session->setFlash('success', "Деньги конвертированны в бонусы.");
-                return $this->redirect('/site/play');
             }elseif($action == 'start'){
                 Yii::$app->session->setFlash('success', "Нажмите с нажатия кнопки START.");
-                return $this->redirect('/site/play');
             }else{
                 $random = Yii::$container->get('random');
                 while (!$result = $random->getPresent());
