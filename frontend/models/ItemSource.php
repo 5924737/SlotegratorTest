@@ -11,18 +11,16 @@ namespace frontend\models;
 
 class ItemSource implements IService
 {
-    protected $class;
     protected $uid;
 
-    public function __construct($class, $uid)
+    public function __construct($uid)
     {
-        $this->class = $class;
         $this->uid = $uid;
     }
 
     public function getPresent()
     {
-        $res = $this->class::find()->orderBy("rand()")->one();
+        $res = PresentItems::find()->orderBy("rand()")->one();
         if( --$res->count >= 0){
             $res->count;
             $res->save();
@@ -44,16 +42,16 @@ class ItemSource implements IService
         ];
     }
 
-    public function refundLast()
+    public static function refundLast($uid)
     {
 //        var_dump('refundLast');die;
-        $userInfo = UserConfig::findOne(['uid' => $this->uid]);
+        $userInfo = UserConfig::findOne(['uid' => $uid]);
         $config = json_decode($userInfo->config, true);
         $item = array_pop($config['item']);
         $userInfo->config = json_encode($config);
 
         $userInfo->save();
-        $res = $this->class::find(['name' => $item])->one();
+        $res = PresentItems::find(['name' => $item])->one();
         $res->count++;
         return $res->save();
     }

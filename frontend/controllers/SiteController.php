@@ -97,31 +97,27 @@ class SiteController extends Controller
             $courseConvertation = 2;
             $result = false;
 
-            $dependency = [ BonusSource::class, ItemSource::class, MoneySource::class ];
-            Yii::$container->set(BonusSource::class, [],['int' => rand($minLevel,$maxLevel), 'uid' => Yii::$app->user->id]);
-            Yii::$container->set(ItemSource::class, [],['class' => PresentItems::class, 'uid' => Yii::$app->user->id]);
-            Yii::$container->set(MoneySource::class, [],[
-                    'int' => rand($minLevel,$maxLevel),
-                    'class'=>PresentCash::class,
-                    'uid' => Yii::$app->user->id,
-                    'courseConvertation' => $courseConvertation
-            ]);
-            Yii::$container->set('random', $dependency[array_rand($dependency)]);
             if($action == 'refresh'){
                 $this->start();
             }elseif($action == 'refuse') {
-                $items = Yii::$container->get(ItemSource::class);
-                if($items -> refundLast())
+                if(ItemSource::refundLast(Yii::$app->user->id))
                     Yii::$app->session->setFlash('success', "Вы отказались от приза.");
             }elseif($action == 'convert' || $int) {
-                $items = Yii::$container->get(MoneySource::class);
-                if($items->convertToBonus($int))
+                if(MoneySource::convertToBonus($int, Yii::$app->user->id, $courseConvertation))
                     Yii::$app->session->setFlash('success', "Деньги конвертированны в бонусы.");
             }elseif($action == 'start'){
                 Yii::$app->session->setFlash('success', "Нажмите с нажатия кнопки START.");
             }else{
-                $random = Yii::$container->get('random');
-                while (!$result = $random->getPresent());
+                $dependency = [ BonusSource::class, ItemSource::class, MoneySource::class ];
+                Yii::$container->set(BonusSource::class, [],['int' => rand($minLevel,$maxLevel), 'uid' => Yii::$app->user->id]);
+                Yii::$container->set(ItemSource::class, [],['uid' => Yii::$app->user->id]);
+                Yii::$container->set(MoneySource::class, [],['int' => rand($minLevel,$maxLevel), 'uid' => Yii::$app->user->id, 'courseConvertation' => $courseConvertation
+                ]);
+                do{
+                    Yii::$container->set('random', $dependency[array_rand($dependency)]);
+                    $random = Yii::$container->get('random');
+                    $result = $random->getPresent();
+                }while(!$result);
             }
             $bonusInfo = BonusInfo::run();
             $userInfo = UserInfo::run(Yii::$app->user->id);

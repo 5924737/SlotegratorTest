@@ -16,9 +16,8 @@ class MoneySource implements IService
     protected $uid;
     protected $courseConvertation;
 
-    public function __construct($int, $class, $uid, $courseConvertation)
+    public function __construct($int, $uid, $courseConvertation)
     {
-        $this->class = $class;
         $this->int = $int;
         $this->uid = $uid;
         $this->courseConvertation = $courseConvertation;
@@ -26,9 +25,9 @@ class MoneySource implements IService
 
     public function getPresent()
     {
-        $res = $this->class::find()->one();
+        $res = PresentCash::find()->one();
         $co = $res->count - $this->int;
-        if($co > 0){
+        if($co >= 0){
             $res->count = $co;
             $res->save();
         }else{
@@ -50,13 +49,13 @@ class MoneySource implements IService
         ];
     }
 
-    public function convertToBonus($int)
+    public static function convertToBonus($int, $uid, $courseConvertation)
     {
-        $userInfo = UserConfig::findOne(['uid' => $this->uid]);
+        $userInfo = UserConfig::findOne(['uid' => $uid]);
         $config = json_decode($userInfo->config, true);
         $config['cash'] = $config['cash'] - $int;
         if($config['cash'] >= 0){
-            $config['bonus'] = $config['bonus'] + $int*$this->courseConvertation;
+            $config['bonus'] = $config['bonus'] + $int*$courseConvertation;
             $userInfo->config = json_encode($config);
             return $userInfo->save();
         }
