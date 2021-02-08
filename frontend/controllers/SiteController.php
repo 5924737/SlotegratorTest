@@ -3,6 +3,7 @@ namespace frontend\controllers;
 
 use frontend\models\BonusInfo;
 use frontend\models\BonusSource;
+use frontend\models\IService;
 use frontend\models\ItemSource;
 use frontend\models\MoneySource;
 use frontend\models\PresentCash;
@@ -106,17 +107,17 @@ class SiteController extends Controller
                 if(MoneySource::convertToBonus($int, Yii::$app->user->id, $courseConvertation))
                     Yii::$app->session->setFlash('success', "Деньги конвертированны в бонусы.");
             }elseif($action == 'start'){
-                Yii::$app->session->setFlash('success', "Нажмите с нажатия кнопки START.");
+                Yii::$app->session->setFlash('success', "Начните с нажатия кнопки START.");
             }else{
                 $dependency = [ BonusSource::class, ItemSource::class, MoneySource::class ];
                 Yii::$container->set(BonusSource::class, [],['int' => rand($minLevel,$maxLevel), 'uid' => Yii::$app->user->id]);
                 Yii::$container->set(ItemSource::class, [],['uid' => Yii::$app->user->id]);
-                Yii::$container->set(MoneySource::class, [],['int' => rand($minLevel,$maxLevel), 'uid' => Yii::$app->user->id, 'courseConvertation' => $courseConvertation
-                ]);
+                Yii::$container->set(MoneySource::class, [],['int' => rand($minLevel,$maxLevel), 'uid' => Yii::$app->user->id, 'courseConvertation' => $courseConvertation]);
+
                 do{
-                    Yii::$container->set('random', $dependency[array_rand($dependency)]);
-                    $random = Yii::$container->get('random');
-                    $result = $random->getPresent();
+                    Yii::$container->set(IService::class, $dependency[array_rand($dependency)]);
+                    $random = Yii::$container->get(PresentStrategy::class);
+                    $result = $random->run();
                 }while(!$result);
             }
             $bonusInfo = BonusInfo::run();

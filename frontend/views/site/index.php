@@ -7,7 +7,7 @@ $this->title = 'SlotegratorTest';
 <div class="site-index">
 
     <div class="jumbotron">
-        <h3>Для участия в розыграше призов авторизируйтесь!</h3>
+        <h3>Для участия в розыгрыше призов авторизируйтесь!</h3>
         <h3>Логин: user33 Пароль: password33</h3>
 
 
