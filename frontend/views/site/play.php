@@ -54,8 +54,7 @@ $this->title = 'SlotegratorTest';
         </table>
         <p><a class="btn btn-lg btn-success" onclick="SendMoney()">Вывести деньги на карту</a></p>
     </div>
-</div>
-    <div class="jumbotron">
+    <div style="margin-top:200px; height:300px;" class="jumbotron">
         <?php if($result):?>
             <h1>Вы выиграли приз!!!</h1>
             <h2><?=$result['message']?></h2>
@@ -63,17 +62,11 @@ $this->title = 'SlotegratorTest';
                 <h3><a href="<?=$value?>"><?=$key?></a></h3>
             <?php endforeach;?>
         <?php endif;?>
-        <p><a style="margin-top:130px;" class="btn btn-lg btn-success" href="/site/play">Играть</a></p>
+    </div>
+    <div class="jumbotron">
+        <p><a class="btn btn-lg btn-success" href="/site/play">Играть</a></p>
     </div>
 
 </div>
 
-<script>
-    function SendMoney() {
-      $.get( "/site/sendmoney?uid=<?=$uid?>", function( data ) {
-        $( ".result" ).html( data );
-        alert( data );
-      });
-    }
-</script>
 
