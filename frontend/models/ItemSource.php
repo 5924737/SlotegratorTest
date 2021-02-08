@@ -44,7 +44,6 @@ class ItemSource implements IService
 
     public static function refundLast($uid)
     {
-//        var_dump('refundLast');die;
         $userInfo = UserConfig::findOne(['uid' => $uid]);
         $config = json_decode($userInfo->config, true);
         $item = array_pop($config['item']);

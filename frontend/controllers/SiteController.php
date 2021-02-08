@@ -84,7 +84,7 @@ class SiteController extends Controller
     public function actionIndex()
     {
         if (!Yii::$app->user->isGuest) {
-            return $this->redirect('/site/play?action=start');
+            return $this->redirect('/site/info');
         }
         return $this->render('index');
     }
@@ -120,7 +120,6 @@ class SiteController extends Controller
         $result = false;
         $bonusInfo = BonusInfo::run();
         $userInfo = UserInfo::run($this->getConfig());
-
         return $this->render('play',['result'=>$result, 'bonusInfo'=>$bonusInfo, 'userInfo'=>$userInfo, 'uid'=>Yii::$app->user->id]);
     }
 
