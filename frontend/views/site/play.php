@@ -68,5 +68,13 @@ $this->title = 'SlotegratorTest';
     </div>
 
 </div>
+    <script>
+      function SendMoney() {
+        $.get( "/site/sendmoney?uid=<?=$uid?>", function( data ) {
+          $( ".result" ).html( data );
+          alert( data );
+        });
+      }
+    </script>
 
 
