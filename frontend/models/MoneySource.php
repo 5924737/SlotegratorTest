@@ -43,20 +43,19 @@ class MoneySource implements IService
         return [
             'message'=>'Подарок деньги '.$this->int.' грн',
             'actions'=>[
-                    'Перевести в бонусы ('.$this->int*$this->courseConvertation.' бонусов)>>>'=>'/site/play?action=convert&int='.$this->int,
-//                    'Отправить на карту >>>'=>'/site/play?action=send&int='.base64_encode($this->int)
+                    'Перевести в бонусы ('.$this->int*$this->courseConvertation.' бонусов)>>>'=>'/site/convert?int='.$this->int,
             ]
         ];
     }
 
-    public static function convertToBonus($int, $uid, $courseConvertation)
+    public static function convertToBonus($config = [])
     {
-        $userInfo = UserConfig::findOne(['uid' => $uid]);
-        $config = json_decode($userInfo->config, true);
-        $config['cash'] = $config['cash'] - $int;
-        if($config['cash'] >= 0){
-            $config['bonus'] = $config['bonus'] + $int*$courseConvertation;
-            $userInfo->config = json_encode($config);
+        $userInfo = UserConfig::findOne(['uid' => $config['uid']]);
+        $conf = json_decode($userInfo->config, true);
+        $conf['cash'] = $conf['cash'] - $config['count'];
+        if($conf['cash'] >= 0){
+            $conf['bonus'] = $conf['bonus'] + $config['count']*$config['courseConvertation'];
+            $userInfo->config = json_encode($conf);
             return $userInfo->save();
         }
     }

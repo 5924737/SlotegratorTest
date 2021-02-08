@@ -37,7 +37,7 @@ class ItemSource implements IService
         return [
             'message'=>'Подарок "'.$res->name.'"',
             'actions'=>[
-                'Отказаться >>>'=>'/site/play?action=refuse',
+                'Отказаться >>>'=>'/site/refuse',
             ]
         ];
     }

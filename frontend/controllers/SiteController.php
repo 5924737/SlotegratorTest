@@ -88,42 +88,62 @@ class SiteController extends Controller
         }
         return $this->render('index');
     }
+    public function getConfig(){
+       return [
+           'int' => rand(1,100),
+           'uid' => Yii::$app->user->id,
+           'courseConvertation' => 2
+       ];
+    }
 
-    public function actionPlay($action = '', $int = 0)
+    public function actionPlay()
     {
         if (Yii::$app->user->isGuest) return $this->redirect('/site/index');
+            $dependency = [BonusSource::class, ItemSource::class, MoneySource::class];
+            Yii::$container->set(BonusSource::class, [],$this->getConfig());
+            Yii::$container->set(ItemSource::class, [],$this->getConfig());
+            Yii::$container->set(MoneySource::class, [],$this->getConfig());
+            do{
+                Yii::$container->set(IService::class, $dependency[array_rand($dependency)]);
+                $random = Yii::$container->get(PresentStrategy::class);
+                $result = $random->run();
+            }while(!$result);
 
-            $minLevel = 1;
-            $maxLevel = 100;
-            $courseConvertation = 2;
-            $result = false;
+        $bonusInfo = BonusInfo::run();
+        $userInfo = UserInfo::run($this->getConfig());
 
-            if($action == 'refresh'){
-                $this->start();
-            }elseif($action == 'refuse') {
-                if(ItemSource::refundLast(Yii::$app->user->id))
-                    Yii::$app->session->setFlash('success', "Вы отказались от приза.");
-            }elseif($action == 'convert' || $int) {
-                if(MoneySource::convertToBonus($int, Yii::$app->user->id, $courseConvertation))
-                    Yii::$app->session->setFlash('success', "Деньги конвертированны в бонусы.");
-            }elseif($action == 'start'){
-                Yii::$app->session->setFlash('success', "Начните с нажатия кнопки START.");
-            }else{
-                $dependency = [ BonusSource::class, ItemSource::class, MoneySource::class ];
-                Yii::$container->set(BonusSource::class, [],['int' => rand($minLevel,$maxLevel), 'uid' => Yii::$app->user->id]);
-                Yii::$container->set(ItemSource::class, [],['uid' => Yii::$app->user->id]);
-                Yii::$container->set(MoneySource::class, [],['int' => rand($minLevel,$maxLevel), 'uid' => Yii::$app->user->id, 'courseConvertation' => $courseConvertation]);
+        return $this->render('play',['result'=>$result, 'bonusInfo'=>$bonusInfo, 'userInfo'=>$userInfo, 'uid'=>Yii::$app->user->id]);
+    }
 
-                do{
-                    Yii::$container->set(IService::class, $dependency[array_rand($dependency)]);
-                    $random = Yii::$container->get(PresentStrategy::class);
-                    $result = $random->run();
-                }while(!$result);
-            }
-            $bonusInfo = BonusInfo::run();
-            $userInfo = UserInfo::run(Yii::$app->user->id);
+    public function actionInfo()
+    {
+        $result = false;
+        $bonusInfo = BonusInfo::run();
+        $userInfo = UserInfo::run($this->getConfig());
 
-            return $this->render('play',['result'=>$result, 'bonusInfo'=>$bonusInfo, 'userInfo'=>$userInfo, 'uid'=>Yii::$app->user->id]);
+        return $this->render('play',['result'=>$result, 'bonusInfo'=>$bonusInfo, 'userInfo'=>$userInfo, 'uid'=>Yii::$app->user->id]);
+    }
+
+    public function actionRefresh(){
+        if($this->start());
+            $this->redirect('/site/info');
+    }
+
+    public function actionRefuse(){
+        if(ItemSource::refundLast($this->getConfig()['uid']))
+            Yii::$app->session->setFlash('success', "Вы отказались от приза.");
+        $this->redirect('/site/info');
+    }
+
+    public function actionConvert($int = 0){
+        if(MoneySource::convertToBonus($this->getConfig() + ['count'=>$int]))
+            Yii::$app->session->setFlash('success', "Деньги конвертированны в бонусы.");
+        $this->redirect('/site/info');
+    }
+
+    public function actionStart(){
+        Yii::$app->session->setFlash('success', "Начните с нажатия кнопки START.");
+        $this->redirect('/site/info');
     }
 
     public function start()
@@ -155,7 +175,7 @@ class SiteController extends Controller
             $presentCash->save();
         }
         Yii::$app->session->setFlash('success', "Призовой фонд обновлен. Баланс пользователя очищен");
-//        return $this->redirect('/site/play');
+        return true;
     }
 
     public function actionSendmoney($uid = 0)

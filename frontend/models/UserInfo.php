@@ -12,9 +12,9 @@ namespace frontend\models;
 class UserInfo
 {
 
-    public static function run($userId)
+    public static function run($config = [])
     {
-        $userInfo = UserConfig::findOne(['uid' => $userId]);
+        $userInfo = UserConfig::findOne(['uid' => $config['uid']]);
         $items = json_decode($userInfo->config, true)['item'];
         $it = [];
         $string = '';

@@ -28,7 +28,7 @@ $this->title = 'SlotegratorTest';
                 </tr>
             </tbody>
         </table>
-        <p><a class="btn btn-lg btn-success" href="/site/play?action=refresh">Start</a></p>
+        <p><a class="btn btn-lg btn-success" href="/site/refresh">Start</a></p>
     </div>
     <div class="col-xs-4">
         <table>
